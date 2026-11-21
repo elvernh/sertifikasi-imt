@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { login } from "./actions";
 
+// Page /login (public).
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { error, registered } = await searchParams;
 

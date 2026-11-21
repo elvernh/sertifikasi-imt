@@ -1,5 +1,6 @@
 import { register } from "./actions";
 
+// Page /register (public): a new tenant signs up.
 export default async function RegisterPage({ searchParams }: PageProps<"/register">) {
   const { error } = await searchParams;
 

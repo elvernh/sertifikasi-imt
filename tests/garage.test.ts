@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { Garage } from "@/domain/garage";
-import { Bicycle, Car, ElectricCar, Motorcycle } from "@/domain/vehicle";
+import { Garage } from "@/models/garage";
+import { Bicycle, Car, ElectricCar, Motorcycle } from "@/models/vehicle";
+import { parseDate } from "@/lib/dates";
 
 describe("Garage.generateIds", () => {
   it("UT-12 first 3 bicycle garages are S001, S002, S003", () => {
@@ -42,10 +43,27 @@ describe("Garage.isCompatibleWith", () => {
   });
 
   it("UT-18 electric car fits the car garage and the EV garage", () => {
-    const ev = new ElectricCar(1, "B 1 A", "Wuling Air ev", 30);
+    const ev = new ElectricCar(1, "B 1 A", "Wuling Air ev", 30, 0);
     expect(carGarage.isCompatibleWith(ev)).toBe(true);
     expect(evGarage.isCompatibleWith(ev)).toBe(true);
     expect(bicycleGarage.isCompatibleWith(ev)).toBe(false);
+  });
+});
+
+describe("Garage.isFreeBetween", () => {
+  // Booked 2026-12-01 until 2026-12-05 (the 5th is free again)
+  const bookings = [{ startDate: parseDate("2026-12-01"), endDate: parseDate("2026-12-05") }];
+
+  it("UT-36 a period that shares any day with a booking is not free", () => {
+    expect(Garage.isFreeBetween(bookings, parseDate("2026-11-28"), parseDate("2026-12-02"))).toBe(false);
+    expect(Garage.isFreeBetween(bookings, parseDate("2026-12-02"), parseDate("2026-12-03"))).toBe(false);
+    expect(Garage.isFreeBetween(bookings, parseDate("2026-11-20"), parseDate("2026-12-20"))).toBe(false);
+  });
+
+  it("UT-37 a period right before or right after a booking is free", () => {
+    expect(Garage.isFreeBetween(bookings, parseDate("2026-11-25"), parseDate("2026-12-01"))).toBe(true);
+    expect(Garage.isFreeBetween(bookings, parseDate("2026-12-05"), parseDate("2026-12-10"))).toBe(true);
+    expect(Garage.isFreeBetween([], parseDate("2026-12-01"), parseDate("2026-12-05"))).toBe(true);
   });
 });
 

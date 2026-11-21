@@ -1,26 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import * as userController from "@/controllers/user-controller";
 import { requireAdmin } from "@/lib/auth";
-import { toUser } from "@/lib/mappers";
-import prisma from "@/lib/prisma";
+import { readNumber } from "@/lib/form";
 
-/** Approve a new tenant so they can start renting. */
+/** "Terima" button: approve a new tenant. */
 export async function approveTenant(formData: FormData): Promise<void> {
   await requireAdmin();
-  const row = await prisma.user.findUniqueOrThrow({ where: { id: Number(formData.get("userId")) } });
-  const user = toUser(row);
-  user.approve();
-  await prisma.user.update({ where: { id: user.id }, data: { status: user.status } });
+  await userController.approveTenant(readNumber(formData, "userId"));
   revalidatePath("/admin");
 }
 
-/** Reject a new tenant (for example the KTP number is not valid). */
+/** "Tolak" button: reject a new tenant. */
 export async function rejectTenant(formData: FormData): Promise<void> {
   await requireAdmin();
-  const row = await prisma.user.findUniqueOrThrow({ where: { id: Number(formData.get("userId")) } });
-  const user = toUser(row);
-  user.reject();
-  await prisma.user.update({ where: { id: user.id }, data: { status: user.status } });
+  await userController.rejectTenant(readNumber(formData, "userId"));
   revalidatePath("/admin");
 }

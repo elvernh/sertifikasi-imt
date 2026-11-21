@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description: "Aplikasi penyewaan garasi kendaraan",
 };
 
+// Shared layout: the menu bar on top, then the page.
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const session = await getSession();
 

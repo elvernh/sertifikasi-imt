@@ -26,12 +26,13 @@ model User {
 }
 
 model Vehicle {
-  id          Int     @id @default(autoincrement()) @map("vehicle_id")
-  userId      Int     @map("user_id")
-  type        String  @db.VarChar(15) // BICYCLE | MOTORCYCLE | CAR | EV
-  plateNumber String? @map("plate_number") @db.VarChar(15)
-  brandModel  String  @map("brand_model") @db.VarChar(50)
-  batteryKwh  Int?    @map("battery_kwh")
+  id             Int     @id @default(autoincrement()) @map("vehicle_id")
+  userId         Int     @map("user_id")
+  type           String  @db.VarChar(15) // BICYCLE | MOTORCYCLE | CAR | EV
+  plateNumber    String? @map("plate_number") @db.VarChar(15)
+  brandModel     String  @map("brand_model") @db.VarChar(50)
+  batteryKwh     Int?    @map("battery_kwh")
+  batteryPercent Int?    @map("battery_percent") // battery left when rented, 0-100 (electric car only)
 
   user    User     @relation(fields: [userId], references: [id])
   rentals Rental[]

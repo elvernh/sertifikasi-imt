@@ -1,17 +1,12 @@
-import { GARAGE_TYPE_LABEL, GARAGE_TYPES, type GarageType } from "@/domain/types";
-import { requireAdmin } from "@/lib/auth";
+import * as garageController from "@/controllers/garage-controller";
 import { formatRupiah } from "@/lib/format";
-import { releaseFinishedGarages } from "@/lib/garage-status";
-import prisma from "@/lib/prisma";
+import { GARAGE_TYPE_LABEL, GARAGE_TYPES, type GarageType } from "@/models/types";
 import { createGarages } from "./actions";
 
-// Use case "Create garages": make many garages of one type at once.
+// Page /admin/garages (admin only): create garages and see all garages.
 export default async function GaragesPage({ searchParams }: PageProps<"/admin/garages">) {
-  await requireAdmin();
   const { error, created } = await searchParams;
-
-  await releaseFinishedGarages();
-  const garages = await prisma.garage.findMany({ orderBy: { id: "asc" } });
+  const garages = await garageController.listGarages();
 
   return (
     <main className="page">

@@ -1,15 +1,15 @@
-// Turns database rows (from Prisma) into domain objects (from the class diagram).
+// Turns database rows (from Prisma) into model objects (from the class diagram).
 import type {
   Garage as GarageRow,
   Rental as RentalRow,
   User as UserRow,
   Vehicle as VehicleRow,
 } from "@/generated/prisma/client";
-import { Garage } from "@/domain/garage";
-import { Rental } from "@/domain/rental";
-import type { GarageStatus, GarageType, RentalType, Role, UserStatus, VehicleType } from "@/domain/types";
-import { User } from "@/domain/user";
-import { createVehicle, type Vehicle } from "@/domain/vehicle";
+import { Garage } from "@/models/garage";
+import { Rental } from "@/models/rental";
+import type { GarageStatus, GarageType, RentalType, Role, UserStatus, VehicleType } from "@/models/types";
+import { User } from "@/models/user";
+import { createVehicle, type Vehicle } from "@/models/vehicle";
 
 export function toUser(row: UserRow): User {
   return new User(
@@ -29,7 +29,14 @@ export function toGarage(row: GarageRow): Garage {
 }
 
 export function toVehicle(row: VehicleRow): Vehicle {
-  return createVehicle(row.type as VehicleType, row.id, row.plateNumber, row.brandModel, row.batteryKwh);
+  return createVehicle(
+    row.type as VehicleType,
+    row.id,
+    row.plateNumber,
+    row.brandModel,
+    row.batteryKwh,
+    row.batteryPercent,
+  );
 }
 
 /** A rental row together with its garage and vehicle rows. */

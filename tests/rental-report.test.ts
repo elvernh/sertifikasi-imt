@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RentalReport, sumTotal, type ReportRental } from "@/domain/rental-report";
+import { RentalReport, sumTotal, type ReportRental } from "@/models/rental-report";
 import { parseDate } from "@/lib/dates";
 
 const rentals: ReportRental[] = [

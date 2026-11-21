@@ -1,39 +1,22 @@
 "use server";
 
-import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+import * as authController from "@/controllers/auth-controller";
+import { errorMessage, readText } from "@/lib/form";
 
-function fail(message: string): never {
-  redirect("/register?error=" + encodeURIComponent(message));
-}
-
-/** Use case "Register": a new tenant signs up and waits for admin approval. */
+/** Register form: the controller checks the values and saves the new tenant. */
 export async function register(formData: FormData): Promise<void> {
-  const nik = String(formData.get("nik")).trim();
-  const fullName = String(formData.get("fullName")).trim();
-  const phone = String(formData.get("phone")).trim();
-  const email = String(formData.get("email")).trim().toLowerCase();
-  const password = String(formData.get("password"));
-
-  if (!/^[0-9]{16}$/.test(nik)) fail("NIK harus 16 digit angka.");
-  if (!fullName || !phone) fail("Nama dan nomor telepon wajib diisi.");
-  if (password.length < 6) fail("Password minimal 6 karakter.");
-
-  const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { nik }] } });
-  if (existing) fail("Email atau NIK sudah terdaftar.");
-
-  await prisma.user.create({
-    data: {
-      nik,
-      fullName,
-      phone,
-      email,
-      passwordHash: await bcrypt.hash(password, 10),
-      role: "TENANT",
-      status: "PENDING",
-    },
-  });
+  try {
+    await authController.registerTenant({
+      nik: readText(formData, "nik"),
+      fullName: readText(formData, "fullName"),
+      phone: readText(formData, "phone"),
+      email: readText(formData, "email").toLowerCase(),
+      password: String(formData.get("password") ?? ""),
+    });
+  } catch (e) {
+    redirect("/register?error=" + encodeURIComponent(errorMessage(e)));
+  }
 
   redirect("/login?registered=1");
 }

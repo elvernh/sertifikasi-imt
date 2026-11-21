@@ -1,19 +1,11 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth";
+import * as rentalController from "@/controllers/rental-controller";
 import { formatDate, today } from "@/lib/dates";
-import { toRental } from "@/lib/mappers";
-import prisma from "@/lib/prisma";
 
-// Use case "Extend rental", step 1: list the garages that are rented today.
+// Page /admin/extend (admin only): garages rented today, step 1 of "Perpanjang Sewa".
 export default async function ExtendListPage({ searchParams }: PageProps<"/admin/extend">) {
-  await requireAdmin();
   const { saved } = await searchParams;
-
-  const rows = await prisma.rental.findMany({
-    include: { garage: true, vehicle: true, user: true },
-    orderBy: { endDate: "asc" },
-  });
-  const activeToday = rows.filter((row) => toRental(row).isActiveOn(today()));
+  const activeToday = await rentalController.listRentalsActiveToday();
 
   return (
     <main className="page">

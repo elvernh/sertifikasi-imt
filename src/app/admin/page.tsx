@@ -1,14 +1,9 @@
-import { requireAdmin } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import * as userController from "@/controllers/user-controller";
 import { approveTenant, rejectTenant } from "./actions";
 
-// Use case "Verify registration": the admin checks the KTP number and approves or rejects.
+// Page /admin (admin only, checked by the middleware): accept or reject new tenants.
 export default async function AdminPage() {
-  await requireAdmin();
-  const pending = await prisma.user.findMany({
-    where: { role: "TENANT", status: "PENDING" },
-    orderBy: { id: "asc" },
-  });
+  const pending = await userController.listPendingTenants();
 
   return (
     <main className="page">

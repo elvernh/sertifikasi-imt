@@ -1,21 +1,16 @@
 import Link from "next/link";
-import { requireTenant } from "@/lib/auth";
+import * as rentalController from "@/controllers/rental-controller";
+import * as userController from "@/controllers/user-controller";
 import { formatDate } from "@/lib/dates";
 import { formatRupiah } from "@/lib/format";
-import { toUser } from "@/lib/mappers";
-import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/session";
 
-// Tenant home: shows the approval status and the tenant's rentals.
+// Page /tenant (tenant only, checked by the middleware): approval status and "Sewa Saya".
 export default async function TenantPage({ searchParams }: PageProps<"/tenant">) {
-  const session = await requireTenant();
   const { saved } = await searchParams;
-
-  const user = toUser(await prisma.user.findUniqueOrThrow({ where: { id: session.userId } }));
-  const rentals = await prisma.rental.findMany({
-    where: { userId: user.id },
-    include: { garage: true, vehicle: true },
-    orderBy: { id: "desc" },
-  });
+  const session = await getSession(); // never null here: the middleware already checked it
+  const user = await userController.getUser(session!.userId);
+  const rentals = await rentalController.listTenantRentals(user.id);
 
   return (
     <main className="page">

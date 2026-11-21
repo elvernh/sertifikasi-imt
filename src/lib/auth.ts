@@ -1,4 +1,5 @@
-// Page and action guards: send the user to /login if they are not allowed.
+// Role checks for Server Actions (the forms that change data). Pages are already
+// protected by the middleware in src/proxy.ts; actions check again to be safe.
 import { redirect } from "next/navigation";
 import { getSession, type Session } from "./session";
 

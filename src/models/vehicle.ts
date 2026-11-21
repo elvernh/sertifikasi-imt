@@ -42,6 +42,7 @@ export class ElectricCar extends Vehicle {
     plateNumber: string | null,
     brandModel: string,
     private batteryKwh: number,
+    private batteryPercent: number, // how much battery is left, 0-100 %
   ) {
     super(id, plateNumber, brandModel);
   }
@@ -50,9 +51,14 @@ export class ElectricCar extends Vehicle {
     return ["CAR", "EV"];
   }
 
-  /** Charge the battery from empty to full: battery capacity x price per kWh. */
+  /** kWh needed to charge to full: capacity x (100 - % left) / 100. */
+  kwhToFull(): number {
+    return (this.batteryKwh * (100 - this.batteryPercent)) / 100;
+  }
+
+  /** Charge from the % left up to full: kWh needed x price per kWh (whole rupiah). */
   chargingCost(kwhPrice: number): number {
-    return this.batteryKwh * kwhPrice;
+    return Math.round(this.kwhToFull() * kwhPrice);
   }
 }
 
@@ -63,9 +69,10 @@ export function createVehicle(
   plateNumber: string | null,
   brandModel: string,
   batteryKwh: number | null,
+  batteryPercent: number | null,
 ): Vehicle {
   if (type === "BICYCLE") return new Bicycle(id, null, brandModel);
   if (type === "MOTORCYCLE") return new Motorcycle(id, plateNumber, brandModel);
   if (type === "CAR") return new Car(id, plateNumber, brandModel);
-  return new ElectricCar(id, plateNumber, brandModel, batteryKwh ?? 0);
+  return new ElectricCar(id, plateNumber, brandModel, batteryKwh ?? 0, batteryPercent ?? 0);
 }

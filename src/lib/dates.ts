@@ -19,6 +19,21 @@ export function addDays(date: Date, days: number): Date {
   return new Date(date.getTime() + days * ONE_DAY_MS);
 }
 
+/** How many days the month of `date` has (28, 29, 30 or 31). */
+export function daysInMonth(date: Date): number {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+}
+
+/**
+ * Same day of the month, `months` months later.
+ * If that month is shorter, it stops at its last day (2026-01-31 + 1 month = 2026-02-28).
+ */
+export function addMonths(date: Date, months: number): Date {
+  const firstOfTarget = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1));
+  const day = Math.min(date.getUTCDate(), daysInMonth(firstOfTarget));
+  return new Date(Date.UTC(firstOfTarget.getUTCFullYear(), firstOfTarget.getUTCMonth(), day));
+}
+
 /** Number of whole days from `from` to `to` (negative if `to` is earlier). */
 export function daysBetween(from: Date, to: Date): number {
   return Math.round((to.getTime() - from.getTime()) / ONE_DAY_MS);

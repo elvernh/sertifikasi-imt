@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { describe, expect, it } from "vitest";
-import { User } from "@/domain/user";
+import { User } from "@/models/user";
 
 function makeTenant(passwordHash = "x"): User {
   return new User(1, "3171234567890001", "Budi", "0812", "budi@mail.test", passwordHash, "TENANT", "PENDING");

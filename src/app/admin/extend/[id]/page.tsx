@@ -1,19 +1,13 @@
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/lib/auth";
+import * as extensionController from "@/controllers/extension-controller";
 import { formatDate } from "@/lib/dates";
 import { formatRupiah } from "@/lib/format";
-import prisma from "@/lib/prisma";
 import ExtendForm from "./extend-form";
 
-// Use case "Extend rental", step 2: pick a new end date and upload the payment proof.
+// Page /admin/extend/[id] (admin only): step 2 of "Perpanjang Sewa".
 export default async function ExtendPage({ params }: PageProps<"/admin/extend/[id]">) {
-  await requireAdmin();
   const { id } = await params;
-
-  const rental = await prisma.rental.findUnique({
-    where: { id: Number(id) },
-    include: { garage: true, vehicle: true, user: true },
-  });
+  const rental = await extensionController.getRentalForExtension(Number(id));
   if (!rental) notFound();
 
   return (

@@ -3,7 +3,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
-import { Garage } from "../src/domain/garage";
+import { Garage } from "../src/models/garage";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 const prisma = new PrismaClient({

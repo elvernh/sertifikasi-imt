@@ -5,6 +5,9 @@ import type { Vehicle } from "./vehicle";
 const PREFIX: Record<GarageType, string> = { BICYCLE: "S", CAR: "C", EV: "E" };
 const MAX_PER_TYPE = 999;
 
+/** A period a garage is already booked for. The end date itself is free again. */
+export type Booking = { startDate: Date; endDate: Date };
+
 export class Garage {
   constructor(
     readonly id: string,
@@ -36,7 +39,15 @@ export class Garage {
     return vehicle.allowedGarageTypes().includes(this.type);
   }
 
-  /** True if nobody is renting this garage. */
+  /**
+   * True if none of the garage's bookings share a day with [start, end).
+   * Example: booked 1-5 Dec (ends 5 Dec) and a new rental from 5 Dec is fine.
+   */
+  static isFreeBetween(bookings: Booking[], start: Date, end: Date): boolean {
+    return bookings.every((b) => b.endDate <= start || end <= b.startDate);
+  }
+
+  /** True if nobody is renting this garage today. */
   isAvailable(): boolean {
     return this.status === "AVAILABLE";
   }

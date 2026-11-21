@@ -1,7 +1,7 @@
 // Login session stored in a signed cookie (library: jose).
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
-import type { Role } from "@/domain/types";
+import type { Role } from "@/models/types";
 
 const COOKIE_NAME = "session";
 const secretKey = new TextEncoder().encode(process.env.SESSION_SECRET);
