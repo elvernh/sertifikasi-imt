@@ -1,0 +1,87 @@
+// Database tables for the Garage Rental app (matches the ERD page).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int    @id @default(autoincrement()) @map("user_id")
+  nik          String @unique @db.VarChar(16)
+  fullName     String @map("full_name") @db.VarChar(50)
+  phone        String @db.VarChar(15)
+  email        String @unique @db.VarChar(50)
+  passwordHash String @map("password_hash") @db.VarChar(255)
+  role         String @db.VarChar(10) // ADMIN | TENANT
+  status       String @db.VarChar(10) // PENDING | APPROVED | REJECTED
+
+  vehicles Vehicle[]
+  rentals  Rental[]
+
+  @@map("Users")
+}
+
+model Vehicle {
+  id          Int     @id @default(autoincrement()) @map("vehicle_id")
+  userId      Int     @map("user_id")
+  type        String  @db.VarChar(15) // BICYCLE | MOTORCYCLE | CAR | EV
+  plateNumber String? @map("plate_number") @db.VarChar(15)
+  brandModel  String  @map("brand_model") @db.VarChar(50)
+  batteryKwh  Int?    @map("battery_kwh")
+
+  user    User     @relation(fields: [userId], references: [id])
+  rentals Rental[]
+
+  @@map("Vehicles")
+}
+
+model Garage {
+  id         String @id @map("garage_id") @db.VarChar(4) // S001, C010, E003
+  type       String @db.VarChar(15) // BICYCLE | CAR | EV
+  dailyPrice Int    @map("daily_price")
+  kwhPrice   Int?   @map("kwh_price")
+  status     String @db.VarChar(10) // AVAILABLE | USED
+
+  rentals Rental[]
+
+  @@map("Garages")
+}
+
+model Rental {
+  id              Int      @id @default(autoincrement()) @map("rental_id")
+  userId          Int      @map("user_id")
+  vehicleId       Int      @map("vehicle_id")
+  garageId        String   @map("garage_id") @db.VarChar(4)
+  rentalType      String   @map("rental_type") @db.VarChar(10) // DAILY | MONTHLY
+  days            Int?
+  startDate       DateTime @map("start_date") @db.Date
+  endDate         DateTime @map("end_date") @db.Date
+  rentalCost      Int      @map("rental_cost")
+  chargingCost    Int      @map("charging_cost")
+  totalCost       Int      @map("total_cost")
+  paymentProofUrl String   @map("payment_proof_url") @db.VarChar(255)
+
+  user       User              @relation(fields: [userId], references: [id])
+  vehicle    Vehicle           @relation(fields: [vehicleId], references: [id])
+  garage     Garage            @relation(fields: [garageId], references: [id])
+  extensions RentalExtension[]
+
+  @@map("Rentals")
+}
+
+model RentalExtension {
+  id              Int      @id @default(autoincrement()) @map("extension_id")
+  rentalId        Int      @map("rental_id")
+  oldEndDate      DateTime @map("old_end_date") @db.Date
+  newEndDate      DateTime @map("new_end_date") @db.Date
+  amountDue       Int      @map("amount_due")
+  paymentProofUrl String   @map("payment_proof_url") @db.VarChar(255)
+
+  rental Rental @relation(fields: [rentalId], references: [id])
+
+  @@map("RentalExtensions")
+}
