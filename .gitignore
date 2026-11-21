@@ -50,3 +50,6 @@ next-env.d.ts
 # uploaded payment proofs
 /public/uploads/*
 !/public/uploads/.gitkeep
+# notes live outside the repo, in the workspace folder
+*.md
+*.MD
