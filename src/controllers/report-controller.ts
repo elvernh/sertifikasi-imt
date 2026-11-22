@@ -1,7 +1,7 @@
 // Report controller: builds the four rental report tables for the admin.
 import { formatDate } from "@/lib/dates";
 import prisma from "@/lib/prisma";
-import { RentalReport, sumTotal, type ReportRental } from "@/models/rental-report";
+import { RentalReport, sumExtensions, sumTotal, type ReportRental } from "@/models/rental-report";
 import { GARAGE_TYPE_LABEL, GARAGE_TYPES } from "@/models/types";
 
 export const MONTH_NAMES = [
@@ -9,17 +9,25 @@ export const MONTH_NAMES = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember",
 ];
 
-/** One line of a report table: a label, how many rentals, and their total income. */
-export type ReportRow = { label: string; count: number; total: number };
+/**
+ * One line of a report table: a label, how many rentals, income from new rentals,
+ * income from extensions, and both together.
+ */
+export type ReportRow = { label: string; count: number; rentalTotal: number; extensionTotal: number; total: number };
 
 /** Turns a label and a list of rentals into one report line. */
 function toRow(label: string, rentals: ReportRental[]): ReportRow {
-  return { label, count: rentals.length, total: sumTotal(rentals) };
+  const rentalTotal = sumTotal(rentals);
+  const extensionTotal = sumExtensions(rentals);
+  return { label, count: rentals.length, rentalTotal, extensionTotal, total: rentalTotal + extensionTotal };
 }
 
 /** Use case "View rental report": per month (in a year), per day (in a month), per garage type, per tenant. */
 export async function getRentalReport(year: number, month: number) {
-  const rentals = await prisma.rental.findMany({ include: { garage: true }, orderBy: { startDate: "asc" } });
+  const rentals = await prisma.rental.findMany({
+    include: { garage: true, extensions: { select: { amountDue: true } } },
+    orderBy: { startDate: "asc" },
+  });
   const tenants = await prisma.user.findMany({ where: { role: "TENANT" }, orderBy: { fullName: "asc" } });
   const report = new RentalReport(rentals);
 

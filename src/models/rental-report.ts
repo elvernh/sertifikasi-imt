@@ -9,6 +9,7 @@ export type ReportRental = {
   startDate: Date;
   totalCost: number;
   garage: { type: string };
+  extensions: { amountDue: number }[]; // payments made when the admin extended the rental
 };
 
 export class RentalReport {
@@ -35,7 +36,12 @@ export class RentalReport {
   }
 }
 
-/** Adds up the total cost of a list of rentals. */
+/** Adds up the total cost of a list of rentals (what was paid when each rental was made). */
 export function sumTotal(rentals: ReportRental[]): number {
   return rentals.reduce((sum, r) => sum + r.totalCost, 0);
+}
+
+/** Adds up the extension payments of a list of rentals. */
+export function sumExtensions(rentals: ReportRental[]): number {
+  return rentals.reduce((sum, r) => sum + r.extensions.reduce((s, e) => s + e.amountDue, 0), 0);
 }

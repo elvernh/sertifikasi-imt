@@ -30,6 +30,9 @@ export default async function ReportsPage({ searchParams }: PageProps<"/admin/re
         <button className="btn">Tampilkan</button>
       </form>
 
+      <p className="text-sm">
+        Biaya perpanjangan dihitung bersama sewanya (bulan dan tanggal mengikuti tanggal mulai sewa).
+      </p>
       <ReportTable title={`Per bulan dalam tahun ${year}`} header="Bulan" rows={report.perMonth} />
       <ReportTable title={`Per hari dalam bulan ${MONTH_NAMES[month - 1]} ${year}`} header="Tanggal" rows={report.perDay} />
       <ReportTable title="Per tipe garasi" header="Tipe garasi" rows={report.perGarageType} />
@@ -38,7 +41,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/admin/re
   );
 }
 
-/** One report table: label, number of rentals, total income. */
+/** One report table: label, number of rentals, income from new rentals and extensions, total income. */
 function ReportTable({ title, header, rows }: { title: string; header: string; rows: ReportRow[] }) {
   return (
     <section className="card">
@@ -48,13 +51,18 @@ function ReportTable({ title, header, rows }: { title: string; header: string; r
       ) : (
         <table className="table">
           <thead>
-            <tr><th>{header}</th><th>Jumlah sewa</th><th>Total pendapatan</th></tr>
+            <tr>
+              <th>{header}</th><th>Jumlah sewa</th><th>Sewa baru</th>
+              <th>Perpanjangan</th><th>Total pendapatan</th>
+            </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.label}>
                 <td>{r.label}</td>
                 <td>{r.count}</td>
+                <td>{formatRupiah(r.rentalTotal)}</td>
+                <td>{formatRupiah(r.extensionTotal)}</td>
                 <td>{formatRupiah(r.total)}</td>
               </tr>
             ))}
